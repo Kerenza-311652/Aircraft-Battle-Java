@@ -1,0 +1,36 @@
+@startuml
+title Singleton Pattern - HeroAircraft
+'https://plantuml.com/class-diagram
+
+class Client {
+}
+
+class HeroAircraft {
+    - {static} instance: HeroAircraft
+    - shootNum: int
+    - power: int
+    - direction: int
+
+    - HeroAircraft(int locationX, int locationY, int speedX, int speedY, int hp)
+
+    + {static} getInstance(): HeroAircraft
+
+    + forward(): void
+    + shoot(): List<BaseBullet>
+}
+
+Client .right.> HeroAircraft : 调用 getInstance() 获取实例
+HeroAircraft --> HeroAircraft : 包含自身唯一实例 (-instance)
+
+note bottom of HeroAircraft
+  **getInstance() 方法实现逻辑:**
+  if (instance == null) {
+      synchronized (HeroAircraft.class) {
+          if (instance == null) {
+              instance = new HeroAircraft(...)
+          }
+      }
+  }
+  return instance
+end note
+@enduml

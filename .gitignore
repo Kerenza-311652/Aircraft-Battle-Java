@@ -1,0 +1,12 @@
+# 忽略编译输出文件夹
+build/
+out/
+target/
+*.class
+
+# 忽略 IDEA 的配置文件
+.idea/
+*.iml
+
+# 忽略 Gradle 运行时的缓存
+.gradle/

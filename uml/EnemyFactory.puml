@@ -1,0 +1,96 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+skinparam packageStyle rectangle
+skinparam nodesep 50
+skinparam ranksep 50
+
+package "产品系 (Product Hierarchy)" {
+    abstract class AbstractAircraft {
+        # maxHp:int
+        # hp:int
+        + AbstractAircraft(int locationX, int locationY, int speedX, int speedY, int hp)
+        + decreaseHp(int decrease):void
+        + getHp():int
+        + {abstract} shoot():List<BaseBullet>
+    }
+
+    class MobEnemy {
+        + MobEnemy(...)
+        + forward():void
+        + shoot():List<BaseBullet>
+    }
+
+    class EliteEnemy {
+        + EliteEnemy(...)
+        + forward():void
+        + shoot():List<BaseBullet>
+    }
+
+    class AwakeEnemy {
+        + AwakeEnemy(...)
+        + forward():void
+        + shoot():List<BaseBullet>
+    }
+
+    class AceEnemy {
+        + AceEnemy(...)
+        + forward():void
+        + shoot():List<BaseBullet>
+    }
+
+    class BossEnemy {
+        + BossEnemy(...)
+        + forward():void
+        + shoot():List<BaseBullet>
+    }
+
+    AbstractAircraft <|-- MobEnemy
+    AbstractAircraft <|-- EliteEnemy
+    AbstractAircraft <|-- AwakeEnemy
+    AbstractAircraft <|-- AceEnemy
+    AbstractAircraft <|-- BossEnemy
+}
+
+package "工厂系 (Creator Hierarchy)" {
+    interface EnemyFactory {
+        + createEnemy():AbstractAircraft
+    }
+
+    class MobFactory {
+        + createEnemy():AbstractAircraft
+    }
+
+    class EliteFactory {
+        + createEnemy():AbstractAircraft
+    }
+
+    class AwakeFactory {
+        + createEnemy():AbstractAircraft
+    }
+
+    class AceFactory {
+        + createEnemy():AbstractAircraft
+    }
+
+    class BossFactory {
+        + createEnemy():AbstractAircraft
+    }
+
+    EnemyFactory <|.. MobFactory
+    EnemyFactory <|.. EliteFactory
+    EnemyFactory <|.. AwakeFactory
+    EnemyFactory <|.. AceFactory
+    EnemyFactory <|.. BossFactory
+}
+
+EnemyFactory .right.> AbstractAircraft
+
+MobFactory .right.> MobEnemy : <<create>>
+EliteFactory .right.> EliteEnemy : <<create>>
+AwakeFactory .right.> AwakeEnemy : <<create>>
+AceFactory .right.> AceEnemy : <<create>>
+BossFactory .right.> BossEnemy : <<create>>
+
+
+@enduml
