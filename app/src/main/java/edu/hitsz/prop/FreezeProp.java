@@ -1,11 +1,14 @@
 package edu.hitsz.prop;
 
 import edu.hitsz.application.ImageManager;
+import edu.hitsz.observer.Observer;
+import edu.hitsz.observer.Subject;
+import java.util.ArrayList;
+import java.util.List;
 
-/**
- * 冰冻道具
- */
-public class FreezeProp extends AbstractProp {
+public class FreezeProp extends AbstractProp implements Subject {
+
+    private List<Observer> observerList = new ArrayList<>();
 
     public FreezeProp(int locationX, int locationY, int speedX, int speedY) {
         super(locationX, locationY, speedX, speedY);
@@ -13,8 +16,24 @@ public class FreezeProp extends AbstractProp {
     }
 
     @Override
+    public void registerObserver(Observer observer) {
+        observerList.add(observer);
+    }
+
+    @Override
+    public void removeObserver(Observer observer) {
+        observerList.remove(observer);
+    }
+
+    @Override
+    public void notifyObservers() {
+        for (Observer observer : observerList) {
+            observer.updateFreeze();
+        }
+    }
+
+    @Override
     public void active() {
-        // Todo: 后续迭代实现冰冻减速逻辑
-        System.out.println("FreezeProp active!");
+        notifyObservers();
     }
 }

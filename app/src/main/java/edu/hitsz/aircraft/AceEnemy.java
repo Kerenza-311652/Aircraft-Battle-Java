@@ -1,27 +1,23 @@
 package edu.hitsz.aircraft;
 
 import edu.hitsz.application.ImageManager;
-import edu.hitsz.bullet.BaseBullet;
 import edu.hitsz.application.Main;
-import edu.hitsz.bullet.EnemyBullet;
+import edu.hitsz.observer.Observer;
 import edu.hitsz.strategy.ScatterShoot;
 
-import java.util.LinkedList;
-import java.util.List;
-
 /**
- * 精英敌机
+ * 王牌敌机
  */
-public class AceEnemy extends AbstractAircraft {
-
-    private int shootNum = 3;
-    private int power = 15;
-    private int direction = 1;
+public class AceEnemy extends AbstractAircraft implements Observer {
 
     public AceEnemy(int locationX, int locationY, int speedX, int speedY, int hp) {
         super(locationX, locationY, speedX, speedY, hp);
         this.image = ImageManager.ACE_ENEMY_IMAGE;
-        this.strategy = new ScatterShoot();
+
+        this.shootNum = 3;
+        this.power = 15;
+        this.direction = 1;
+        this.setShootStrategy(new ScatterShoot());
     }
 
     @Override
@@ -33,7 +29,30 @@ public class AceEnemy extends AbstractAircraft {
     }
 
     @Override
-    public List<BaseBullet> shoot() {
-        return strategy.doShoot(this.locationX, this.locationY, this.speedX, this.speedY, this.direction, this.power, this.shootNum);
+    public void updateBomb() {
+        this.hp -= 10;
+    }
+
+    @Override
+    public void updateFreeze() {
+        int originalSpeedX = this.speedX;
+        int originalSpeedY = this.speedY;
+
+        this.speedX -= 1;
+        this.speedY -= 1;
+
+        Runnable freezeTask = () -> {
+            try {
+                Thread.sleep(5000);
+
+                this.speedX = originalSpeedX;
+                this.speedY = originalSpeedY;
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        };
+
+        new Thread(freezeTask, "Freeze-Ace-Thread").start();
     }
 }

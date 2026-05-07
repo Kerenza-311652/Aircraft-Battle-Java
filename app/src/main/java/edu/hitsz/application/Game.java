@@ -33,14 +33,14 @@ public abstract class Game extends Pane {
     private int backGroundTop = 0;
 
     //游戏逻辑更新间隔
-    private int timeInterval = 40;
+    protected int timeInterval = 40;
 
     private final HeroAircraft heroAircraft;
-    private final List<AbstractAircraft> enemyAircrafts;
+    protected final List<AbstractAircraft> enemyAircrafts;
     private final List<BaseBullet> heroBullets;
     private final List<BaseBullet> enemyBullets;
 
-    //新增道具self
+    //新增道具
     private final List<AbstractProp> props;
 
     //屏幕中出现的敌机最大数量
@@ -51,16 +51,24 @@ public abstract class Game extends Pane {
     private int enemySpawnCounter = 0;
 
     //英雄机和敌机射击周期
-    protected double shootCycle = 30;
+    protected double shootCycle = 20;
     private int shootCounter = 0;
 
+    //敌机属性增幅
+    protected double enemyPropertyRate = 1.0;
+    protected double eliteProb = 0.20;
+    protected double bossHpRate = 1.0;
+
+    // 管理火力道具倒计时的线程对象
+    private Thread firepowerThread = null;
+
     //当前玩家分数和游戏难度
-    private int score = 0;
+    protected int score = 0;
     protected int difficulty;
 
     //生成boss相关
-    private boolean bossExisting = false;
-    private int bossScoreThreshold = 500;
+    protected boolean bossExisting = false;
+    protected int bossScoreThreshold = 500;
 
     //游戏结束标志
     private boolean gameOverFlag = false;
@@ -69,10 +77,6 @@ public abstract class Game extends Pane {
     private final Canvas canvas;
     private final GraphicsContext gc;
 
-    //音乐开关
-    protected MusicThread bgmThread;
-    protected MusicThread bossBgmThread;
-
     //JavaFX 提供的动画定时器
     private AnimationTimer timer;
     //上一帧时刻(纳秒)
@@ -80,6 +84,9 @@ public abstract class Game extends Pane {
     //累加器，记录两帧之间经过的实际时间
     private long nanoAccumulator = 0L;
 
+    //创新功能能量条
+    protected int energy = 0;
+    protected final int MAX_ENERGY = 100;
 
     protected Image backgroundImage;
 
@@ -105,17 +112,50 @@ public abstract class Game extends Pane {
 
         this.backgroundImage = getBackgroundImage();
 
-        bgmThread = new MusicThread("src/main/resources/videos/bgm.wav", true);
-        bgmThread.start();
+        MusicManager.playBGM();
+
+        //创新功能按空格释放
+        this.setFocusTraversable(true);
+        this.setOnKeyPressed(event -> {
+            if (event.getCode() == javafx.scene.input.KeyCode.SPACE) {
+                triggerUltimate();
+            }
+        });
+        this.setOnMouseClicked(event -> {
+            this.requestFocus();
+        });
     }
 
-   protected abstract Image getBackgroundImage();
+    /**
+     * 创新功能释放炸弹
+     */
+    private void triggerUltimate() {
+        if (energy >= MAX_ENERGY) {
+            energy = 0;
+            MusicManager.playSoundEffect("bomb_explosion.wav");
+            for (AbstractAircraft enemy : enemyAircrafts) {
+                if (enemy instanceof edu.hitsz.observer.Observer && !(enemy instanceof BossEnemy)) {
+                    ((edu.hitsz.observer.Observer) enemy).updateBomb();
+                    score += 10;
+                }
+            }
+            for (BaseBullet bullet : enemyBullets) {
+                if (bullet instanceof edu.hitsz.observer.Observer) {
+                    ((edu.hitsz.observer.Observer) bullet).updateBomb();
+                }
+            }
+        }
+    }
+
+    protected abstract Image getBackgroundImage();
 
 
     /**
      * 游戏启动入口，执行游戏逻辑
      */
-    public void action() {
+    public final void action() {
+
+        this.requestFocus();
 
         if (timer != null) {
             return;
@@ -148,30 +188,18 @@ public abstract class Game extends Pane {
             }
         };
         timer.start();
-
     }
 
-    private void tick() {
+    private final void tick() {
+
+        updateDifficulty();
+
         enemySpawnCounter++;
         if (enemySpawnCounter >=enemySpawnCycle) {
             enemySpawnCounter = 0;
 
             //生成boss
-            if (score >= bossScoreThreshold && !bossExisting) {
-                bossExisting = true;
-                bossScoreThreshold += 500;
-
-                EnemyFactory bossFactory = new edu.hitsz.factory.BossFactory();
-                enemyAircrafts.add(bossFactory.createEnemy());
-
-                System.out.println("WARNING: Boss Enemy Approaching!");
-
-                if (bgmThread != null) {
-                    bgmThread.stopMusic();
-                }
-                bossBgmThread = new MusicThread("src/main/resources/videos/bgm_boss.wav", true);
-                bossBgmThread.start();
-            }
+            generateBoss();
 
             // 产生普通敌机
             if (enemyAircrafts.size() < enemyMaxNumber) {
@@ -182,13 +210,24 @@ public abstract class Game extends Pane {
                     enemyFactory = new AceFactory();
                 } else if (randomValue < 0.15) {
                     enemyFactory = new AwakeFactory();
-                } else if (randomValue < 0.35) {
+                } else if (randomValue < 0.15 + eliteProb) {
                     enemyFactory = new EliteFactory();
                 } else {
                     enemyFactory = new MobFactory();
                 }
 
-                enemyAircrafts.add(enemyFactory.createEnemy());
+                AbstractAircraft newEnemy = enemyFactory.createEnemy();
+
+                if (enemyPropertyRate > 0) {
+                    int currentHp = newEnemy.getHp();
+                    int extraHp = (int) (currentHp * (enemyPropertyRate - 1));
+                    if (extraHp > 0) {
+                        newEnemy.decreaseHp(-extraHp);
+                    }
+                    newEnemy.setSpeedY((int) (newEnemy.getSpeedY() * enemyPropertyRate));
+                }
+
+                enemyAircrafts.add(newEnemy);
             }
         }
         // 飞机射出子弹
@@ -197,7 +236,7 @@ public abstract class Game extends Pane {
         bulletsMoveAction();
         // 飞机移动
         aircraftMoveAction();
-        // 让道具往下掉self
+        // 道具移动
         propsMoveAction();
         // 撞击检测
         crashCheckAction();
@@ -206,6 +245,15 @@ public abstract class Game extends Pane {
         // 游戏结束检查
         checkResultAction();
     }
+
+    /**
+     * 更新游戏难度
+     */
+    protected abstract void updateDifficulty();
+    /**
+     * 生成 Boss
+     */
+    protected abstract void generateBoss();
 
     //***********************
     //      Action 各部分
@@ -266,15 +314,18 @@ public abstract class Game extends Pane {
                     continue;
                 }
                 if (enemyAircraft.crash(bullet)) {
-                    new MusicThread("src/main/resources/videos/bullet_hit.wav", false).start();
+                    MusicManager.playSoundEffect("bullet_hit.wav");
+
                     enemyAircraft.decreaseHp(bullet.getPower());
                     bullet.vanish();
 
                     if (enemyAircraft.notValid()) {
                         score += 10;
+                        energy = Math.min(energy + 10, MAX_ENERGY);//创新功能，敌机坠毁加能量
 
                         if (enemyAircraft instanceof BossEnemy) {
                             score += 50;
+                            energy = Math.min(energy + 50, MAX_ENERGY);//创新功能，boss坠毁加能量
                             bossExisting = false;
                             for (int i = 0; i < 3; i++) {
                                 int x = enemyAircraft.getLocationX() + (i - 1) * 30;
@@ -286,11 +337,7 @@ public abstract class Game extends Pane {
                                 props.add(PropFactory.createProp(randomType, x, y, 0, 5));
                             }
                             System.out.println("Boss Defeated! Waiting for the next one...");
-                            if (bossBgmThread != null) {
-                                bossBgmThread.stopMusic();
-                            }
-                            bgmThread = new MusicThread("src/main/resources/videos/bgm.wav", true);
-                            bgmThread.start();
+                            MusicManager.playBGM();
                         }
 
                         if (Math.random() < 0.8) {
@@ -300,6 +347,7 @@ public abstract class Game extends Pane {
 
                             if (enemyAircraft instanceof AceEnemy) {
                                 double rand = Math.random();
+
                                 if (rand < 0.2) propType = "Blood";
                                 else if (rand < 0.4) propType = "Bomb";
                                 else if (rand < 0.6) propType = "Freeze";
@@ -308,6 +356,7 @@ public abstract class Game extends Pane {
 
                             } else if (enemyAircraft instanceof AwakeEnemy) {
                                 double rand = Math.random();
+
                                 if (rand < 0.25) propType = "Blood";
                                 else if (rand < 0.5) propType = "Bomb";
                                 else if (rand < 0.75) propType = "Fire";
@@ -315,6 +364,7 @@ public abstract class Game extends Pane {
 
                             } else if (enemyAircraft instanceof EliteEnemy) {
                                 double rand = Math.random();
+
                                 if (rand < 0.33) propType = "Blood";
                                 else if (rand < 0.66) propType = "Fire";
                                 else propType = "SuperFire";
@@ -340,17 +390,35 @@ public abstract class Game extends Pane {
                 continue;
             }
             if (heroAircraft.crash(prop)) {
-                prop.active();
-                new MusicThread("src/main/resources/videos/get_supply.wav", false).start();
 
-                //这里还有问题，不确定爆炸声什么时候响
+                //观察者模式
+                if (prop instanceof edu.hitsz.observer.Subject) {
+                    edu.hitsz.observer.Subject subjectProp = (edu.hitsz.observer.Subject) prop;
+                    for (AbstractAircraft enemy : enemyAircrafts) {
+                        if (enemy instanceof edu.hitsz.observer.Observer) {
+                            subjectProp.registerObserver((edu.hitsz.observer.Observer) enemy);
+                        }
+                    }
+                    for (BaseBullet bullet : enemyBullets) {
+                        if (bullet instanceof edu.hitsz.observer.Observer) {
+                            subjectProp.registerObserver((edu.hitsz.observer.Observer) bullet);
+                        }
+                    }
+                }
+
+                prop.active();
+                MusicManager.playSoundEffect("get_supply.wav");
+
                 if (prop instanceof edu.hitsz.prop.BombProp) {
-                    new MusicThread("src/main/resources/videos/bomb_explosion.wav", false).start();
+                    MusicManager.playSoundEffect("bomb_explosion.wav");
                 }
 
                 if (prop instanceof edu.hitsz.prop.FireProp || prop instanceof edu.hitsz.prop.SuperFireProp) {
                     System.out.println("火力加强！多线程计时器启动：10秒");
 
+                    if (firepowerThread != null && firepowerThread.isAlive()) {
+                        firepowerThread.interrupt();
+                    }
                     Runnable firepowerTask = () -> {
                         try {
                             Thread.sleep(10000);
@@ -358,11 +426,12 @@ public abstract class Game extends Pane {
                             heroAircraft.setShootStrategy(new DirectShoot());
                             System.out.println("火力加强结束，已恢复直射模式！");
                         } catch (InterruptedException ex) {
-                            ex.printStackTrace();
+                            System.out.println("吃到新火力道具，旧计时器作废，火力时间重新刷新为10秒！");
                         }
                     };
 
-                    new Thread(firepowerTask, "Firepower-Thread").start();
+                    firepowerThread = new Thread(firepowerTask, "Firepower-Thread");
+                    firepowerThread.start();
                 }
                 prop.vanish();
             }
@@ -370,7 +439,7 @@ public abstract class Game extends Pane {
 
     }
 
-    // 新增道具移动方法self
+    // 道具移动
     private void propsMoveAction() {
         for (AbstractProp prop : props) {
             prop.forward();
@@ -387,7 +456,6 @@ public abstract class Game extends Pane {
         enemyBullets.removeIf(AbstractFlyingObject::notValid);
         heroBullets.removeIf(AbstractFlyingObject::notValid);
         enemyAircrafts.removeIf(AbstractFlyingObject::notValid);
-        //  删除无效道具
         props.removeIf(AbstractFlyingObject::notValid);
     }
 
@@ -401,9 +469,8 @@ public abstract class Game extends Pane {
             gameOverFlag = true;
             System.out.println("Game Over!");
 
-            if (bgmThread != null) bgmThread.stopMusic();
-            if (bossBgmThread != null) bossBgmThread.stopMusic();
-            new MusicThread("src/main/resources/videos/game_over.wav", false).start();
+            MusicManager.stopAllBGM();
+            MusicManager.playSoundEffect("game_over.wav");
 
             javafx.application.Platform.runLater(() -> {
 
@@ -427,7 +494,7 @@ public abstract class Game extends Pane {
                 });
             });
         }
-    };
+    }
 
 
     //***********************
@@ -462,6 +529,28 @@ public abstract class Game extends Pane {
         );
 
         paintScoreAndLife();
+
+        paintEnergyBar();//创新功能，大招能量条
+    }
+
+    //创新功能，画能量条
+    private void paintEnergyBar() {
+        int x = 10;
+        int y = 70;
+        gc.setFill(Color.WHITE);
+        gc.setFont(Font.font("SansSerif", FontWeight.BOLD, 20));
+        gc.fillText("ENERGY:", x, y);
+
+        gc.setStroke(Color.WHITE);
+        gc.strokeRect(x + 100, y - 18, 200, 20);
+
+        if (energy >= MAX_ENERGY) {
+            gc.setFill(Color.CYAN);
+            gc.fillText("PRESS SPACE!", x + 320, y);
+        } else {
+            gc.setFill(Color.ORANGE);
+        }
+        gc.fillRect(x + 100, y - 18, 200 * ((double) energy / MAX_ENERGY), 20);
     }
 
     private void paintImageWithPositionRevised(List<? extends AbstractFlyingObject> objects) {

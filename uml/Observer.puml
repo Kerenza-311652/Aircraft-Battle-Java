@@ -1,0 +1,58 @@
+@startuml
+
+interface Observer {
+    + update()
+}
+
+abstract class Subject {
+    # observers: List<Observer>
+    + registerObserver(o: Observer)
+    + removeObserver(o: Observer)
+    + notifyObservers()
+}
+
+class BombProp {
+    + notifyObservers()
+}
+
+class FreezeProp {
+    + notifyObservers()
+}
+
+class MobEnemy {
+    + update()
+}
+
+class EliteEnemy {
+    + update()
+}
+
+class AwakeEnemy {
+    + update()
+}
+
+class AceEnemy {
+    + update()
+}
+
+class BossEnemy {
+    + update()
+}
+
+class EnemyBullet {
+    + update()
+}
+
+Subject o-> Observer
+
+Subject <|-- BombProp
+Subject <|-- FreezeProp
+
+Observer <|.. MobEnemy
+Observer <|.. EliteEnemy
+Observer <|.. AwakeEnemy
+Observer <|.. AceEnemy
+Observer <|.. BossEnemy
+Observer <|.. EnemyBullet
+
+@enduml

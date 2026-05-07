@@ -23,7 +23,6 @@ public class ScoreBoard {
     private ObservableList<Record> recordData;
     private TableView<Record> table;
 
-    // 【修改】：要求传入当前难度
     public ScoreBoard(int difficulty) {
         this.recordDao = new RecordDaoImpl(difficulty);
 
@@ -34,7 +33,6 @@ public class ScoreBoard {
         root.setPadding(new Insets(20));
         root.setAlignment(Pos.CENTER);
 
-        // 【新增】：根据难度显示不同的标题
         String modeName = difficulty == 1 ? "EASY" : (difficulty == 2 ? "NORMAL" : "HARD");
         Label titleLabel = new Label("难度: " + modeName + "           排行榜 ");
         titleLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1A237E;");
@@ -58,7 +56,6 @@ public class ScoreBoard {
         table.getColumns().addAll(rankCol, nameCol, scoreCol, timeCol);
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-        // 初始装载数据
         recordData = FXCollections.observableArrayList(recordDao.getAllRecords());
         table.setItems(recordData);
 

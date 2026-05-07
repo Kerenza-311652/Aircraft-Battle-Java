@@ -33,7 +33,7 @@ public class StartMenu {
         Button btnEasy = new Button("简单模式 (EASY)");
         btnEasy.setStyle(btnStyle);
 
-        Button btnMedium = new Button("普通模式 (MEDIUM)");
+        Button btnMedium = new Button("普通模式 (NORMAL)");
         btnMedium.setStyle(btnStyle);
 
         Button btnHard = new Button("困难模式 (HARD)");

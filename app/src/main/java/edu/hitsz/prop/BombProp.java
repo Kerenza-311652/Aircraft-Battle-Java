@@ -1,11 +1,14 @@
 package edu.hitsz.prop;
 
 import edu.hitsz.application.ImageManager;
+import edu.hitsz.observer.Observer;
+import edu.hitsz.observer.Subject;
+import java.util.ArrayList;
+import java.util.List;
 
-/**
- * 炸弹道具
- */
-public class BombProp extends AbstractProp {
+public class BombProp extends AbstractProp implements Subject {
+
+    private List<Observer> observerList = new ArrayList<>();
 
     public BombProp(int locationX, int locationY, int speedX, int speedY) {
         super(locationX, locationY, speedX, speedY);
@@ -13,8 +16,27 @@ public class BombProp extends AbstractProp {
     }
 
     @Override
+    public void registerObserver(Observer observer) {
+        observerList.add(observer);
+    }
+
+    @Override
+    public void removeObserver(Observer observer) {
+        observerList.remove(observer);
+    }
+
+    @Override
+    public void notifyObservers() {
+        for (Observer observer : observerList) {
+            observer.updateBomb();
+        }
+    }
+
+    @Override
     public void active() {
-        // Todo: 后续迭代实现清屏炸弹逻辑
-        System.out.println("BombProp active!");
+        System.out.println("炸弹生效！");
+        notifyObservers();
     }
 }
+
+

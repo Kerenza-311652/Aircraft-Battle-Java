@@ -7,16 +7,6 @@ import edu.hitsz.prop.*;
  * 负责集中创建所有种类的道具
  */
 public class PropFactory {
-
-    /**
-     * 静态工厂方法
-     * @param propType 道具的类型标识（如 "Blood", "Fire", "SuperFire"）
-     * @param locationX x坐标
-     * @param locationY y坐标
-     * @param speedX x方向速度
-     * @param speedY y方向速度
-     * @return 具体的道具实例，如果类型不匹配则返回null
-     */
     public static AbstractProp createProp(String propType, int locationX, int locationY, int speedX, int speedY) {
         switch (propType) {
             case "Blood":

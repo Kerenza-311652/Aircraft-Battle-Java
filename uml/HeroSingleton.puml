@@ -19,8 +19,8 @@ class HeroAircraft {
     + shoot(): List<BaseBullet>
 }
 
-Client .right.> HeroAircraft : 调用 getInstance() 获取实例
-HeroAircraft --> HeroAircraft : 包含自身唯一实例 (-instance)
+Client .right.> HeroAircraft
+HeroAircraft --> HeroAircraft
 
 note bottom of HeroAircraft
   **getInstance() 方法实现逻辑:**

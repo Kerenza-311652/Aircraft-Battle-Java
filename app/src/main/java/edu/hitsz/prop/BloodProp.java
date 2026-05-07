@@ -15,7 +15,6 @@ public class BloodProp extends AbstractProp {
 
     @Override
     public void active() {
-        // Todo: 后续迭代实现具体的加血逻辑
         HeroAircraft hero = HeroAircraft.getInstance();
         hero.setHp(hero.getHp() + 20);
 

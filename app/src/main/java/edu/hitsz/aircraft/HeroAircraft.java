@@ -1,11 +1,5 @@
 package edu.hitsz.aircraft;
 
-import edu.hitsz.bullet.BaseBullet;
-import edu.hitsz.bullet.HeroBullet;
-
-import java.util.LinkedList;
-import java.util.List;
-
 import edu.hitsz.application.Main;
 import edu.hitsz.application.ImageManager;
 import edu.hitsz.strategy.DirectShoot;
@@ -16,21 +10,14 @@ import edu.hitsz.strategy.DirectShoot;
  */
 public class HeroAircraft extends AbstractAircraft {
 
-    //添加一个私有实例变量
     private volatile static HeroAircraft instance;
-
-    //每次射击发射子弹数量
-    private int shootNum = 1;
-
-    //子弹威力
-    private int power = 30;
-
-    //子弹射击方向 (向上发射：-1，向下发射：1)
-    private int direction = -1;
 
     private HeroAircraft(int locationX, int locationY, int speedX, int speedY, int hp) {
         super(locationX, locationY, speedX, speedY, hp);
-        this.strategy = new DirectShoot();
+        this.shootNum = 1;
+        this.power = 30;
+        this.direction = -1;
+        this.setShootStrategy(new DirectShoot());
     }
 
     public static HeroAircraft getInstance() {
@@ -50,13 +37,8 @@ public class HeroAircraft extends AbstractAircraft {
         return instance;
     }
 
-    //以下3个均是有关加血道具的方法self
     public void setHp(int hp) {
         this.hp = Math.min(hp, maxHp);
-    }
-
-    public void setShootNum(int shootNum) {
-        this.shootNum = shootNum;
     }
 
     public int getMaxHp() {
@@ -65,12 +47,5 @@ public class HeroAircraft extends AbstractAircraft {
 
     @Override
     public void forward() {
-        // 英雄机由鼠标控制，不通过forward函数移动
     }
-
-    @Override
-    public List<BaseBullet> shoot() {
-        return strategy.doShoot(this.locationX, this.locationY, this.speedX, this.speedY, this.direction, this.power, this.shootNum);
-    }
-
 }

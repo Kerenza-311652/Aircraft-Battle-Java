@@ -27,7 +27,7 @@ public class ImageManager {
     private static final Map<String, Image> CLASSNAME_IMAGE_MAP = new HashMap<>();
 
     public static Image BACKGROUND_IMAGE_EASY;
-    public static Image BACKGROUND_IMAGE_MEDIUM;
+    public static Image BACKGROUND_IMAGE_NORMAL;
     public static Image BACKGROUND_IMAGE_HARD;
 
     public static Image HERO_IMAGE;
@@ -48,7 +48,7 @@ public class ImageManager {
         try {
 
             BACKGROUND_IMAGE_EASY = loadFromResources("/images/bg.jpg");
-            BACKGROUND_IMAGE_MEDIUM = loadFromResources("/images/bg2.jpg");
+            BACKGROUND_IMAGE_NORMAL = loadFromResources("/images/bg2.jpg");
             BACKGROUND_IMAGE_HARD = loadFromResources("/images/bg3.jpg");
 
 

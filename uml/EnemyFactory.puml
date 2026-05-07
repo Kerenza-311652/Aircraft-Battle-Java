@@ -5,7 +5,7 @@ skinparam packageStyle rectangle
 skinparam nodesep 50
 skinparam ranksep 50
 
-package "产品系 (Product Hierarchy)" {
+package "产品系" {
     abstract class AbstractAircraft {
         # maxHp:int
         # hp:int
@@ -52,7 +52,7 @@ package "产品系 (Product Hierarchy)" {
     AbstractAircraft <|-- BossEnemy
 }
 
-package "工厂系 (Creator Hierarchy)" {
+package "工厂系" {
     interface EnemyFactory {
         + createEnemy():AbstractAircraft
     }
@@ -86,11 +86,11 @@ package "工厂系 (Creator Hierarchy)" {
 
 EnemyFactory .right.> AbstractAircraft
 
-MobFactory .right.> MobEnemy : <<create>>
-EliteFactory .right.> EliteEnemy : <<create>>
-AwakeFactory .right.> AwakeEnemy : <<create>>
-AceFactory .right.> AceEnemy : <<create>>
-BossFactory .right.> BossEnemy : <<create>>
+MobFactory .right.> MobEnemy
+EliteFactory .right.> EliteEnemy
+AwakeFactory .right.> AwakeEnemy
+AceFactory .right.> AceEnemy
+BossFactory .right.> BossEnemy
 
 
 @enduml

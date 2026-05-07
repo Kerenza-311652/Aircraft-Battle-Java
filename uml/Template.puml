@@ -1,0 +1,28 @@
+@startuml
+
+abstract class Game {
+    + action()
+    # updateDifficulty()
+    # generateBoss()
+}
+
+class EasyGame {
+    # updateDifficulty()
+    # generateBoss()
+}
+
+class NormalGame {
+    # updateDifficulty()
+    # generateBoss()
+}
+
+class HardGame {
+    # updateDifficulty()
+    # generateBoss()
+}
+
+Game <|-- EasyGame
+Game <|-- NormalGame
+Game <|-- HardGame
+
+@enduml

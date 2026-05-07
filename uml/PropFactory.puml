@@ -1,13 +1,12 @@
 @startuml
 'https://plantuml.com/class-diagram
 
-'设置排版样式
 skinparam packageStyle rectangle
 skinparam nodesep 40
 skinparam ranksep 50
 
-' ================= 右侧：产品系 =================
-package "产品 (Product)" {
+package "产品 " {
+
     abstract class AbstractProp {
         + AbstractProp(int locationX, int locationY, int speedX, int speedY)
         + forward():void
@@ -46,8 +45,7 @@ package "产品 (Product)" {
     AbstractProp <|-- FreezeProp
 }
 
-' ================= 左侧：简单工厂 =================
-package "简单工厂 (SimpleFactory)" {
+package "简单工厂" {
     class PropFactory {
         + {static} createProp(propType:String, locationX:int, locationY:int, speedX:int, speedY:int):AbstractProp
     }
@@ -66,8 +64,6 @@ package "简单工厂 (SimpleFactory)" {
     end note
 }
 
-' ================= 依赖关系连线 =================
-' 工厂单向依赖抽象产品接口，强制向右排版
-PropFactory .right.> AbstractProp : <<create>>
+PropFactory .right.> AbstractProp
 
 @enduml

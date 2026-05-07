@@ -15,9 +15,7 @@ public abstract class AbstractProp extends AbstractFlyingObject {
     @Override
     public void forward() {
         super.forward();
-        // 道具默认向下匀速直线运动
         locationY += speedY;
-        // 判定 y 轴出界 (768 为 Main.WINDOW_HEIGHT)
         if (locationY >= 768) {
             vanish();
         }

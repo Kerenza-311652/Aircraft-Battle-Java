@@ -43,7 +43,7 @@ public class Main extends Application {
                 game = new EasyGame();
                 break;
             case 2:
-                game = new MediumGame();
+                game = new NormalGame();
                 break;
             case 3:
                 game = new HardGame();

@@ -45,6 +45,6 @@ AbstractAircraft <|-- HeroAircraft
 AbstractAircraft <|-- MobEnemy
 AbstractAircraft <|-- EliteEnemy
 
-AbstractAircraft o--> ShootStrategy : strategy
+AbstractAircraft o--> ShootStrategy
 
 @enduml

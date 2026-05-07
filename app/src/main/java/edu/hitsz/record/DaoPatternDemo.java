@@ -16,19 +16,17 @@ public class DaoPatternDemo {
 
         System.out.println("\n========== 2. 模拟添加三条新记录 ==========");
         recordDao.doAdd(new Record("玩家A", 150, "2026-04-15 10:00"));
-        recordDao.doAdd(new Record("大佬B", 500, "2026-04-15 10:05")); // 故意乱序添加
+        recordDao.doAdd(new Record("大佬B", 500, "2026-04-15 10:05"));
         recordDao.doAdd(new Record("菜鸟C", 50,  "2026-04-15 10:10"));
 
-        System.out.println("添加完成！最新的排行榜 (应该自动按分数降序排好)：");
+        System.out.println("添加完成！最新的排行榜 ：");
         printRecords(recordDao.getAllRecords());
 
         System.out.println("\n========== 3. 模拟删除榜首记录 ==========");
         List<Record> currentRecords = recordDao.getAllRecords();
         if (!currentRecords.isEmpty()) {
-            // 先获取榜首的对象
             Record topRecord = currentRecords.get(0);
             System.out.println("准备删除榜首：" + topRecord.getPName());
-            // 把对象传给 DAO 进行删除
             recordDao.doDelete(topRecord);
         } else {
             System.out.println("排行榜为空，无可删除的数据。");
